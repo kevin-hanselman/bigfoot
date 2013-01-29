@@ -56,7 +56,7 @@ class Footprint:
 	def add_pad(self, pad):
 		self.pads.append(pad)
 
-def	main():
+def main():
 	global fp
 	topparser = init_topparser()	# parser for program start
 	args = topparser.parse_args()
@@ -97,23 +97,24 @@ def cmd_pos(args):
 	global fp
 	print(args)
 
-	offsets = (None, None)
+	offset = [None, None]
 	if args.dir == 'N' or args.dir == 'S': # vertical orientation
 		for i,(pi,r) in enumerate(zip(args.pad,args.ref)):
+			print('%d %d %s' % (i, pi, r))
 			p = fp.pads[pi]
 			if r == 'f':
-				offset[i] = -p._h/2
-			elif r == 'n':
 				offset[i] = p._h/2
+			elif r == 'n':
+				offset[i] = -p._h/2
 			elif r == 'c':
 				offset[i] = 0
 	elif args.dir == 'E' or args.dir == 'W': # horizontal orientation
 		for i,(pi,r) in enumerate(zip(args.pad, args.ref)):
 			p = fp.pads[pi]
 			if r == 'f':
-				offset[i] = -p._w/2
-			elif r == 'n':
 				offset[i] = p._w/2
+			elif r == 'n':
+				offset[i] = -p._w/2
 			elif r == 'c':
 				offset[i] = 0
 	d = sum(offset)
