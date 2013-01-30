@@ -69,7 +69,6 @@ def main():
 		try:
 			args = cmdparser.parse_args(s.split())
 		except SystemExit as ex:
-#			print(repr(ex))
 			continue
 		args.func(args)
 
@@ -95,40 +94,39 @@ def cmd_ls(args):
 
 def cmd_pos(args):
 	global fp
-	print(args)
-
+	
 	offset = [None, None]
 	if args.dir == 'N' or args.dir == 'S': # vertical orientation
-		for i,(pi,r) in enumerate(zip(args.pad,args.ref)):
-			print('%d %d %s' % (i, pi, r))
+		for i,(pi,r) in enumerate(zip(args.pad, args.ref)):
+			#print('%d %d %s' % (i, pi, r))
 			p = fp.pads[pi]
 			if r == 'f':
-				offset[i] = p._h/2
+				offset[i] = p._h/2.0
 			elif r == 'n':
-				offset[i] = -p._h/2
+				offset[i] = -p._h/2.0
 			elif r == 'c':
 				offset[i] = 0
 	elif args.dir == 'E' or args.dir == 'W': # horizontal orientation
 		for i,(pi,r) in enumerate(zip(args.pad, args.ref)):
 			p = fp.pads[pi]
 			if r == 'f':
-				offset[i] = p._w/2
+				offset[i] = p._w/2.0
 			elif r == 'n':
-				offset[i] = -p._w/2
+				offset[i] = -p._w/2.0
 			elif r == 'c':
 				offset[i] = 0
 	d = sum(offset)
 	if args.dir == 'N':
-		d -= args.dist
+		d += -args.dist + fp.pads[args.pad[1]]._y
 		fp.pads[args.pad[0]].change(ypos=d)
 	elif args.dir == 'E':
-		d += args.dist
+		d += args.dist + fp.pads[args.pad[1]]._x
 		fp.pads[args.pad[0]].change(xpos=d)
 	elif args.dir == 'S':
-		d += args.dist
+		d += args.dist + fp.pads[args.pad[1]]._y
 		fp.pads[args.pad[0]].change(ypos=d)
 	elif args.dir == 'W':
-		d -= args.dist
+		d += -args.dist + fp.pads[args.pad[1]]._x
 		fp.pads[args.pad[0]].change(xpos=d)
 		
 def myfloat(val):
