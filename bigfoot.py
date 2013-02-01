@@ -3,6 +3,7 @@
 
 import argparse
 import sys
+import os
 try:
 	import cPickle as pickle
 except:
@@ -42,7 +43,7 @@ class Pad:
 						(self._x - xh, self._y + yh))
 		
 class Footprint:
-	def __init__(self, name='new_footprint', pads=None):
+	def __init__(self, name='newfp', pads=None):
 		self.name = name
 		if pads:
 			self._pads = pads
@@ -73,7 +74,7 @@ def main():
 	
 	fp = Footprint()
 	while(True):
-		s = input('bigfoot >> ')
+		s = input('BGFT: %s >> ' % fp.name)
 		try:
 			args = cmdparser.parse_args(s.split())
 		except SystemExit as ex:
@@ -102,17 +103,25 @@ def cmd_ls(args):
 	
 def cmd_save(args):
 	global fp
-	if args.name:
-		fp.name = args.name
+	if args.out:
+		fp.name, fext = os.path.splitext(os.path.basename(args.out))
+		path = args.out
+		if not fext:
+			path += '.bfp'
+	else:
+		path = fp.name + '.bfp'
 	try:
-		pickle.dump(fp, open(fp.name + '.bfp', 'wb') )
+		pickle.dump(fp, open(path, 'wb') )
 	except IOError as ex:
 		print(str(ex))
 	
 def cmd_load(args):
 	global fp
+	fext = os.path.splitext(args.path)[1]
+	if not fext:
+		args.path += '.bfp'
 	try:
-		fp = pickle.load(open(args.filename, 'rb'))
+		fp = pickle.load(open(args.path, 'rb'))
 	except IOError as ex:
 		print(str(ex))
 
@@ -225,11 +234,11 @@ def init_cmdparser():
 	sp.set_defaults(func=cmd_dist)
 	
 	sp = subs.add_parser('save')
-	sp.add_argument('-n', '--name')
+	sp.add_argument('-o', '--out')
 	sp.set_defaults(func=cmd_save)
 	
 	sp = subs.add_parser('load')
-	sp.add_argument('filename')
+	sp.add_argument('path')
 	sp.set_defaults(func=cmd_load)
 	
 	return parser
