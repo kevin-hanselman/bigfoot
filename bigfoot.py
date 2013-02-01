@@ -3,6 +3,10 @@
 
 import argparse
 import sys
+try:
+	import cPickle as pickle
+except:
+	import pickle
 
 fp = None
 
@@ -91,6 +95,22 @@ def cmd_del(args):
 def cmd_ls(args):
 	global fp
 	fp.display()
+	
+def cmd_save(args):
+	global fp
+	try:
+		pickle.dump(fp, open(fp.name + '.bfp', 'wb') )
+	except IOError as ex:
+		print(str(ex))
+		sys.exit(0)
+	
+def cmd_load(args):
+	global fp
+	try:
+		fp = pickle.load(open(args.filename, 'rb'))
+	except IOError as ex:
+		print(str(ex))
+		sys.exit(0)
 
 def cmd_pos(args):
 	global fp
@@ -199,6 +219,13 @@ def init_cmdparser():
 	sp.add_argument('pad', type=int, nargs=2)
 	sp.add_argument('ref', type=int, nargs=2, choices=range(0,5))
 	sp.set_defaults(func=cmd_dist)
+	
+	sp = subs.add_parser('save')
+	sp.set_defaults(func=cmd_save)
+	
+	sp = subs.add_parser('load')
+	sp.add_argument('filename')
+	sp.set_defaults(func=cmd_load)
 	
 	return parser
 	
