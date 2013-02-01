@@ -19,7 +19,8 @@ class Pad:
 		self.update_corners()
 	
 	def __str__(self):
-		return 'X=%5s, Y=%5s, W=%5s, H=%5s' % (self._x, self._y, self._w, self._h)
+		return 'X= %.4f, Y= %.4f, W= %.4f, H= %.4f' \
+				% (self._x, self._y, self._w, self._h)
 
 	def change(self, xsiz=None, ysiz=None, xpos=None, ypos=None):
 		if xsiz:
@@ -44,24 +45,24 @@ class Footprint:
 	def __init__(self, name='new_footprint', pads=None):
 		self.name = name
 		if pads:
-			self.pads = pads
+			self._pads = pads
 		else:
-			self.pads = []
-			self.pads.append(Pad(0,0,0,0)) # add origin pad
+			self._pads = []
+			self._pads.append(Pad(0,0,0,0)) # add origin pad
 			
 	def display(self):
-		print(fp.name)
-		print('-'*45)
-		for i,p in enumerate(self.pads):
+		print(' '+fp.name)
+		print('-'*60)
+		for i,p in enumerate(self._pads):
 			if not i:
 				s = 'Origin'
 			else:
 				s = p
 			print('Pad %d: %s' % (i, s))
-		print('-'*45)
+		print('-'*60)
 		
 	def add_pad(self, pad):
-		self.pads.append(pad)
+		self._pads.append(pad)
 
 def main():
 	global fp
@@ -89,11 +90,11 @@ def cmd_add(args):
 
 def cmd_edit(args):
 	global fp
-	p = fp.pads[args.pad].change(xsiz=args.w, ysiz=args.h, xpos=args.x, ypos=args.y)
+	p = fp._pads[args.pad].change(xsiz=args.w, ysiz=args.h, xpos=args.x, ypos=args.y)
 
 def cmd_del(args):
 	global fp
-	del fp.pads[args.pad]
+	del fp._pads[args.pad]
 
 def cmd_ls(args):
 	global fp
@@ -122,7 +123,7 @@ def cmd_pos(args):
 	if args.dir == 'N' or args.dir == 'S': # vertical orientation
 		for i,(pi,r) in enumerate(zip(args.pad, args.ref)):
 			#print('%d %d %s' % (i, pi, r))
-			p = fp.pads[pi]
+			p = fp._pads[pi]
 			if r == 'f':
 				offset[i] = p._h/2.0
 			elif r == 'n':
@@ -131,7 +132,7 @@ def cmd_pos(args):
 				offset[i] = 0
 	elif args.dir == 'E' or args.dir == 'W': # horizontal orientation
 		for i,(pi,r) in enumerate(zip(args.pad, args.ref)):
-			p = fp.pads[pi]
+			p = fp._pads[pi]
 			if r == 'f':
 				offset[i] = p._w/2.0
 			elif r == 'n':
@@ -140,17 +141,17 @@ def cmd_pos(args):
 				offset[i] = 0
 	d = sum(offset)
 	if args.dir == 'N':
-		d += -args.dist + fp.pads[args.pad[1]]._y
-		fp.pads[args.pad[0]].change(ypos=d)
+		d += -args.dist + fp._pads[args.pad[1]]._y
+		fp._pads[args.pad[0]].change(ypos=d)
 	elif args.dir == 'E':
-		d += args.dist + fp.pads[args.pad[1]]._x
-		fp.pads[args.pad[0]].change(xpos=d)
+		d += args.dist + fp._pads[args.pad[1]]._x
+		fp._pads[args.pad[0]].change(xpos=d)
 	elif args.dir == 'S':
-		d += args.dist + fp.pads[args.pad[1]]._y
-		fp.pads[args.pad[0]].change(ypos=d)
+		d += args.dist + fp._pads[args.pad[1]]._y
+		fp._pads[args.pad[0]].change(ypos=d)
 	elif args.dir == 'W':
-		d += -args.dist + fp.pads[args.pad[1]]._x
-		fp.pads[args.pad[0]].change(xpos=d)
+		d += -args.dist + fp._pads[args.pad[1]]._x
+		fp._pads[args.pad[0]].change(xpos=d)
 
 def cmd_dist(args):
 	global fp
@@ -162,13 +163,13 @@ def cmd_dist(args):
 		else: # corner
 			points.append(p._corn(r-1))
 	d = twopoint_dist(points)
-	print('dx = %f, dy = %f' % (d[0], d[1]))
+	print('dx = %.4f, dy = %.4f' % (d[0], d[1]))
 			
 def get_pads(listp):
 	global fp
 	out = []
 	for i in listp:
-		out.append(fp.pads[i])
+		out.append(fp._pads[i])
 	return out
 	
 def twopoint_dist(pts):
