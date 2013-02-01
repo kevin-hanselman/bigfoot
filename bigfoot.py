@@ -50,12 +50,15 @@ class Footprint:
 			self.pads.append(Pad(0,0,0,0)) # add origin pad
 			
 	def display(self):
+		print(fp.name)
+		print('-'*45)
 		for i,p in enumerate(self.pads):
 			if not i:
 				s = 'Origin'
 			else:
 				s = p
 			print('Pad %d: %s' % (i, s))
+		print('-'*45)
 		
 	def add_pad(self, pad):
 		self.pads.append(pad)
@@ -98,11 +101,12 @@ def cmd_ls(args):
 	
 def cmd_save(args):
 	global fp
+	if args.name:
+		fp.name = args.name
 	try:
 		pickle.dump(fp, open(fp.name + '.bfp', 'wb') )
 	except IOError as ex:
 		print(str(ex))
-		sys.exit(0)
 	
 def cmd_load(args):
 	global fp
@@ -110,7 +114,6 @@ def cmd_load(args):
 		fp = pickle.load(open(args.filename, 'rb'))
 	except IOError as ex:
 		print(str(ex))
-		sys.exit(0)
 
 def cmd_pos(args):
 	global fp
@@ -221,6 +224,7 @@ def init_cmdparser():
 	sp.set_defaults(func=cmd_dist)
 	
 	sp = subs.add_parser('save')
+	sp.add_argument('-n', '--name')
 	sp.set_defaults(func=cmd_save)
 	
 	sp = subs.add_parser('load')
