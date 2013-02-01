@@ -43,14 +43,14 @@ class Footprint:
 			self.pads = pads
 		else:
 			self.pads = []
-			self.pads.append(None)
+			self.pads.append(Pad(0,0,0,0)) # add origin pad
 			
 	def display(self):
 		for i,p in enumerate(self.pads):
-			if p:
-				s = p
-			else:
+			if not i:
 				s = 'Origin'
+			else:
+				s = p
 			print('Pad %d: %s' % (i, s))
 		
 	def add_pad(self, pad):
@@ -128,10 +128,29 @@ def cmd_pos(args):
 	elif args.dir == 'W':
 		d += -args.dist + fp.pads[args.pad[1]]._x
 		fp.pads[args.pad[0]].change(xpos=d)
-		
-def myfloat(val):
-    return float(val)
 
+def cmd_dist(args):
+	global fp
+	pd = get_pads(args.pad)
+	points = []
+	for r,p in zip(args.ref, pd):
+		if r == 0: # center
+			points.append((p._x, p._y))
+		else: # corner
+			points.append(p._corn(r-1))
+	d = twopoint_dist(points)
+	print('dx = %f, dy = %f' % (d[0], d[1]))
+			
+def get_pads(listp):
+	global fp
+	out = []
+	for i in listp:
+		out.append(fp.pads[i])
+	return out
+	
+def twopoint_dist(pts):
+	return (pts[0][0]-pts[1][0], pts[0][1]-pts[1][1])
+	
 def init_topparser():
 	parser = argparse.ArgumentParser(description=__doc__)
 	parser.add_argument('-V','--version',
@@ -171,10 +190,15 @@ def init_cmdparser():
 	
 	sp = subs.add_parser('pos')
 	sp.add_argument('pad', type=int, nargs=2)
-	sp.add_argument('dist', type=myfloat)
+	sp.add_argument('dist', type=float)
 	sp.add_argument('dir', choices=('N','S','E','W'), default='N')
 	sp.add_argument('ref', choices=('f','n','c'), nargs=2, default='c')
 	sp.set_defaults(func=cmd_pos)
+	
+	sp = subs.add_parser('dist')
+	sp.add_argument('pad', type=int, nargs=2)
+	sp.add_argument('ref', type=int, nargs=2, choices=range(0,5))
+	sp.set_defaults(func=cmd_dist)
 	
 	return parser
 	
